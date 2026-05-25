@@ -1,0 +1,9 @@
+alembic>=1.13,<2
+email-validator>=2.2,<3
+fastapi>=0.115,<0.116
+passlib[bcrypt]>=1.7,<2
+pydantic-settings>=2.5,<3
+python-jose[cryptography]>=3.3,<4
+python-multipart>=0.0.9,<0.1
+sqlmodel>=0.0.22,<0.0.23
+uvicorn[standard]>=0.30,<0.32
