@@ -39,6 +39,17 @@ export interface ContactRead {
   updated_at: string
 }
 
+export interface PropertyContactLinkRead {
+  id: string
+  broker_id: string
+  property_id: string
+  contact_id: string
+  role: string
+  notes?: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface CalendarEventRead {
   id: string
   broker_id: string
@@ -70,4 +81,55 @@ export interface AudioRecordingRead {
   processing_status: string
   created_at: string
   updated_at: string
+}
+
+export interface TranscriptRead {
+  id: string
+  broker_id: string
+  recording_id: string
+  provider: string
+  raw_text: string
+  language_code: string
+  created_at: string
+}
+
+export interface ExtractionRunRead {
+  id: string
+  broker_id: string
+  recording_id: string
+  transcript_id: string
+  provider: string
+  model: string
+  prompt_version: string
+  status: string
+  raw_response_json?: string | null
+  created_at: string
+}
+
+export interface DraftActionRead {
+  id: string
+  broker_id: string
+  extraction_run_id: string
+  recording_id: string
+  transcript_id: string
+  property_id?: string | null
+  contact_id?: string | null
+  contact_role?: string | null
+  action_type: string
+  title: string
+  description?: string | null
+  starts_at?: string | null
+  ends_at?: string | null
+  due_at?: string | null
+  confidence_label: string
+  unresolved_fields: string[]
+  review_status: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ExtractionResultRead {
+  transcript: TranscriptRead
+  extraction_run: ExtractionRunRead
+  draft_actions: DraftActionRead[]
 }

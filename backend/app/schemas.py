@@ -168,3 +168,81 @@ class AudioRecordingRead(SQLModel):
     processing_status: str
     created_at: datetime
     updated_at: datetime
+
+
+class TranscriptRead(SQLModel):
+    id: str
+    broker_id: str
+    recording_id: str
+    provider: str
+    raw_text: str
+    language_code: str
+    created_at: datetime
+
+
+class TranscriptUpdate(SQLModel):
+    raw_text: str
+    language_code: Optional[str] = None
+
+
+class ExtractionRunRead(SQLModel):
+    id: str
+    broker_id: str
+    recording_id: str
+    transcript_id: str
+    provider: str
+    model: str
+    prompt_version: str
+    status: str
+    raw_response_json: Optional[str] = None
+    created_at: datetime
+
+
+class DraftActionBase(SQLModel):
+    property_id: Optional[str] = None
+    contact_id: Optional[str] = None
+    contact_role: Optional[str] = None
+    action_type: str
+    title: str
+    description: Optional[str] = None
+    starts_at: Optional[datetime] = None
+    ends_at: Optional[datetime] = None
+    due_at: Optional[datetime] = None
+    confidence_label: str
+    unresolved_fields: list[str] = []
+    review_status: str
+
+
+class DraftActionRead(DraftActionBase):
+    id: str
+    broker_id: str
+    extraction_run_id: str
+    recording_id: str
+    transcript_id: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class DraftActionUpdate(SQLModel):
+    property_id: Optional[str] = None
+    contact_id: Optional[str] = None
+    contact_role: Optional[str] = None
+    action_type: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    starts_at: Optional[datetime] = None
+    ends_at: Optional[datetime] = None
+    due_at: Optional[datetime] = None
+    confidence_label: Optional[str] = None
+    unresolved_fields: Optional[list[str]] = None
+    review_status: Optional[str] = None
+
+
+class BulkApproveRequest(SQLModel):
+    draft_action_ids: list[str]
+
+
+class ExtractionResultRead(SQLModel):
+    transcript: TranscriptRead
+    extraction_run: ExtractionRunRead
+    draft_actions: list[DraftActionRead]

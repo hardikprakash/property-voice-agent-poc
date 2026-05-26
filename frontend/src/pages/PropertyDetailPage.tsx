@@ -1,19 +1,40 @@
 import { useParams } from 'react-router-dom'
 
+import { ContactLinksSection } from '../features/property-detail/ContactLinksSection'
+import { PropertyFormSection } from '../features/property-detail/PropertyFormSection'
+import { usePropertyDetail } from '../features/property-detail/usePropertyDetail'
 import { PageFrame } from '../layout/PageFrame'
 
 export function PropertyDetailPage() {
   const { propertyId } = useParams()
+  const detail = usePropertyDetail(propertyId)
 
   return (
     <PageFrame
       title="Property detail"
-      subtitle="This page will carry the edit form and related contacts once the CRUD layer is wired through React Query."
+      subtitle="Edit the listing details and connect buyers or sellers so transcript extraction can resolve people against the right property."
     >
-      <section className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">Property ID</p>
-        <h3 className="mt-3 text-2xl font-semibold text-ink-950">{propertyId}</h3>
-      </section>
+      <div className="grid gap-4 xl:grid-cols-[1fr_0.95fr]">
+        <PropertyFormSection
+          title={detail.property?.title ?? propertyId ?? 'Property'}
+          feedback={detail.feedback}
+          form={detail.form}
+          isSaving={detail.isSaving}
+          onFieldChange={detail.updateFormField}
+          onSubmit={detail.saveProperty}
+        />
+
+        <ContactLinksSection
+          links={detail.links}
+          contacts={detail.contacts}
+          contactById={detail.contactById}
+          linkForm={detail.linkForm}
+          isCreatingLink={detail.isCreatingLink}
+          onLinkFieldChange={detail.updateLinkFormField}
+          onCreateLink={detail.createLink}
+          onDeleteLink={detail.deleteLink}
+        />
+      </div>
     </PageFrame>
   )
 }

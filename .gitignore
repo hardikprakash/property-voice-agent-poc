@@ -1,4 +1,6 @@
 .venv/
+.env
+.env.local
 backend/data/
 backend/.env
 frontend/.env
@@ -17,6 +19,8 @@ __pycache__/
 *.sqlite
 *.sqlite3
 *.log
+.coverage
+coverage.xml
 coverage/
 node_modules/
 dist/

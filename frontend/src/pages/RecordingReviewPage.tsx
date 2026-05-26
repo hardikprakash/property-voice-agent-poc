@@ -1,31 +1,79 @@
 import { useParams } from 'react-router-dom'
 
+import { DraftActionCard } from '../features/recording-review/DraftActionCard'
+import { ReviewHeader } from '../features/recording-review/ReviewHeader'
+import { TranscriptPanel } from '../features/recording-review/TranscriptPanel'
+import { useRecordingReview } from '../features/recording-review/useRecordingReview'
 import { PageFrame } from '../layout/PageFrame'
 
 export function RecordingReviewPage() {
   const { recordingId } = useParams()
+  const review = useRecordingReview(recordingId)
 
   return (
     <PageFrame
       title="Review"
-      subtitle="This screen will eventually show the transcript, extracted draft actions, and the approve-or-edit workflow for one call at a time."
+      subtitle="Inspect the transcript, resolve buyer or seller matches, then approve clean draft actions into the in-app calendar."
     >
-      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">Recording</p>
-          <h3 className="mt-3 text-2xl font-semibold text-ink-950">{recordingId}</h3>
-          <p className="mt-3 text-sm leading-6 text-ink-700">
-            Transcript persistence and draft-action extraction are wired later. The current backend surface is ready for the review layer to land on top.
-          </p>
-        </section>
+      <div className="space-y-4">
+        <ReviewHeader
+          title={review.recording?.original_filename ?? recordingId ?? 'Recording'}
+          recordingStatus={review.recording?.processing_status ?? 'uploaded'}
+          durationSeconds={review.recording?.duration_seconds}
+          feedback={review.feedback}
+          hasTranscript={review.hasTranscript}
+          isTranscribing={review.isTranscribing}
+          isSavingTranscript={review.isSavingTranscript}
+          isExtracting={review.isExtracting}
+          onTranscribe={review.generateTranscript}
+          onSaveTranscript={review.saveTranscript}
+          onExtract={review.extractDraftActions}
+        />
 
-        <section className="rounded-[2rem] bg-ink-950 p-6 text-white shadow-soft">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-ember-400">Review checklist</p>
-          <ul className="mt-4 space-y-3 text-sm leading-6 text-sand-100/85">
-            <li>Transcript text is visible and editable.</li>
-            <li>Draft actions can be approved one by one or in bulk.</li>
-            <li>Unresolved property or contact matches stay explicit.</li>
-          </ul>
+        <TranscriptPanel
+          transcriptText={review.transcriptText}
+          onTranscriptChange={review.setTranscriptText}
+          pendingDraftActionCount={review.pendingDraftActionCount}
+          isApprovingAll={review.isApprovingAll}
+          onApproveAll={() => {
+            void review.approveAllPending()
+          }}
+        />
+
+        <section className="space-y-4">
+          {review.draftActions.length ? (
+            review.draftActions.map((action) => {
+              const form = review.draftForms[action.id]
+              if (!form) {
+                return null
+              }
+              return (
+                <DraftActionCard
+                  key={action.id}
+                  action={action}
+                  form={form}
+                  properties={review.properties}
+                  contacts={review.contacts}
+                  isSaving={review.isSavingAction}
+                  isApproving={review.isApprovingAction}
+                  onChange={(updater) => review.updateDraftForm(action.id, updater)}
+                  onSave={() => {
+                    void review.saveAction(action.id)
+                  }}
+                  onApprove={() => {
+                    void review.approveAction(action.id)
+                  }}
+                  onDiscard={() => {
+                    void review.discardAction(action.id)
+                  }}
+                />
+              )
+            })
+          ) : (
+            <section className="rounded-[2rem] border border-dashed border-black/10 bg-white/70 p-6 text-sm text-ink-700">
+              No draft actions yet. Generate or edit the transcript, then run extraction.
+            </section>
+          )}
         </section>
       </div>
     </PageFrame>

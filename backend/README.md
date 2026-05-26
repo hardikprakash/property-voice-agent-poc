@@ -32,6 +32,13 @@ make backend-run
 
 See [backend/.env.example](.env.example) for the supported environment variables.
 
+The voice pipeline now supports:
+
+- `TRANSCRIPTION_PROVIDER=stub` or `openai`
+- `EXTRACTION_PROVIDER=stub` or `openrouter`
+
+The default `stub` values keep the PoC fully local and usable without API credits.
+
 ## Migrations
 
 Run Alembic from the backend directory:
