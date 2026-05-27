@@ -1,6 +1,6 @@
 # Property Voice Agent PoC
 
-Mobile-first PoC for property brokers. The app records or uploads calls, stores them locally, transcribes them into a review surface, extracts draft calendar actions, and requires broker review before anything is saved as a final event.
+Mobile-first PoC for property brokers. The app records or uploads calls, stores them locally, transcribes them into a review surface, extracts draft calendar actions, and requires broker review before anything is saved as a final event. It also supports quick typed notes that enter the same extraction review flow without a transcription step.
 
 ## Project Layout
 
@@ -16,6 +16,7 @@ Mobile-first PoC for property brokers. The app records or uploads calls, stores 
 - buyer and seller linking to properties
 - manual calendar event creation and deletion
 - audio upload and browser microphone recording
+- quick typed-note capture that skips transcription
 - transcript generation route with `stub` and `openai` provider paths
 - transcript editing in the review screen
 - draft action extraction with `stub` and `openrouter` provider paths
@@ -163,6 +164,29 @@ make frontend-run
 ```
 
 The Vite app will be available at `http://127.0.0.1:5173` and proxies `/api` to the backend during local development.
+
+## Demo Data
+
+To populate the local SQLite database with realistic sample entries for frontend review, run:
+
+```bash
+make backend-seed-demo
+```
+
+This creates a dedicated demo broker and reseeds only that broker's data, leaving other accounts untouched.
+
+- Login email: `demo@propertyvoice.local`
+- Login email: `demo@propertyvoice.example.com`
+- Password: `demo12345`
+
+The seeded dataset includes:
+
+- multiple properties across different cities and property types
+- buyers, sellers, and a supporting contact with relationship links
+- recordings in `uploaded`, `transcribed`, and `extracted` states
+- a quick-note recording that skips transcription
+- pending, approved, and discarded draft actions
+- manual and AI-generated events in both open and completed states
 
 ## Validation
 

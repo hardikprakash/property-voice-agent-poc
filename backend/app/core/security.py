@@ -1,19 +1,50 @@
+import base64
+import hashlib
+import hmac
+import secrets
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 ALGORITHM = "HS256"
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+PBKDF2_SCHEME = "pbkdf2-sha256"
+PBKDF2_ROUNDS = 29000
+PBKDF2_SALT_BYTES = 16
+
+
+def _b64encode(value: bytes) -> str:
+    return base64.b64encode(value).decode("ascii").rstrip("=")
+
+
+def _b64decode(value: str) -> bytes:
+    padding = "=" * (-len(value) % 4)
+    return base64.b64decode(value + padding)
+
+
+def _pbkdf2_checksum(password: str, salt: bytes, rounds: int, dklen: int = 32) -> bytes:
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, rounds, dklen=dklen)
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    salt = secrets.token_bytes(PBKDF2_SALT_BYTES)
+    checksum = _pbkdf2_checksum(password, salt, PBKDF2_ROUNDS)
+    return f"${PBKDF2_SCHEME}${PBKDF2_ROUNDS}${_b64encode(salt)}${_b64encode(checksum)}"
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return pwd_context.verify(password, password_hash)
+    try:
+        _, scheme, rounds_text, salt_token, checksum_token = password_hash.split("$")
+        if scheme != PBKDF2_SCHEME:
+            return False
+        rounds = int(rounds_text)
+        salt = _b64decode(salt_token)
+        expected_checksum = _b64decode(checksum_token)
+    except (TypeError, ValueError):
+        return False
+
+    actual_checksum = _pbkdf2_checksum(password, salt, rounds, dklen=len(expected_checksum))
+    return hmac.compare_digest(actual_checksum, expected_checksum)
 
 
 def create_access_token(subject: str, secret_key: str, expires_minutes: int) -> str:

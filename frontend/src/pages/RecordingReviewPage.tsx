@@ -18,10 +18,12 @@ export function RecordingReviewPage() {
       <div className="space-y-4">
         <ReviewHeader
           title={review.recording?.original_filename ?? recordingId ?? 'Recording'}
+          captureSource={review.captureSource}
           recordingStatus={review.recording?.processing_status ?? 'uploaded'}
           durationSeconds={review.recording?.duration_seconds}
           feedback={review.feedback}
           hasTranscript={review.hasTranscript}
+          canGenerateTranscript={review.canGenerateTranscript}
           isTranscribing={review.isTranscribing}
           isSavingTranscript={review.isSavingTranscript}
           isExtracting={review.isExtracting}
@@ -71,7 +73,7 @@ export function RecordingReviewPage() {
             })
           ) : (
             <section className="rounded-[2rem] border border-dashed border-black/10 bg-white/70 p-6 text-sm text-ink-700">
-              No draft actions yet. Generate or edit the transcript, then run extraction.
+              No draft actions yet. Add or edit transcript text, then run extraction.
             </section>
           )}
         </section>

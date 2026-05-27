@@ -170,6 +170,10 @@ class AudioRecordingRead(SQLModel):
     updated_at: datetime
 
 
+class QuickNoteCreate(SQLModel):
+    raw_text: str
+
+
 class TranscriptRead(SQLModel):
     id: str
     broker_id: str

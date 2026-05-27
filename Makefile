@@ -5,7 +5,7 @@ ALEMBIC := ../.venv/bin/alembic
 BACKEND_DIR := backend
 FRONTEND_DIR := frontend
 
-.PHONY: help venv backend-install backend-run backend-migrate backend-health backend-test frontend-install frontend-run frontend-build test validate
+.PHONY: help venv backend-install backend-run backend-migrate backend-health backend-test backend-seed-demo frontend-install frontend-run frontend-build test validate
 
 help:
 	@echo "Available targets:"
@@ -15,6 +15,7 @@ help:
 	@echo "  make backend-migrate  - apply Alembic migrations"
 	@echo "  make backend-health   - call the backend health endpoint"
 	@echo "  make backend-test     - run the backend pytest suite"
+	@echo "  make backend-seed-demo - seed a demo broker with realistic sample data"
 	@echo "  make frontend-install - install frontend dependencies"
 	@echo "  make frontend-run     - run the Vite dev server on port 5173"
 	@echo "  make frontend-build   - build the frontend for production"
@@ -40,6 +41,9 @@ backend-health:
 
 backend-test:
 	cd $(BACKEND_DIR) && PYTHONPATH=. $(PYTHON) -m pytest -q
+
+backend-seed-demo:
+	cd $(BACKEND_DIR) && PYTHONPATH=. $(PYTHON) -m app.demo_seed
 
 frontend-install:
 	cd $(FRONTEND_DIR) && npm install

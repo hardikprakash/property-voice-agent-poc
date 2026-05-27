@@ -3,12 +3,44 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 
 const navItems = [
-  { to: '/dashboard', label: 'Home' },
-  { to: '/recordings/new', label: 'Record' },
-  { to: '/calendar', label: 'Calendar' },
-  { to: '/properties', label: 'Properties' },
-  { to: '/contacts', label: 'Contacts' },
+  { to: '/recordings/new', label: 'Record', icon: RecordIcon },
+  { to: '/calendar', label: 'Events', icon: EventsIcon },
+  { to: '/crm', label: 'Resources', icon: CrmIcon },
 ]
+
+function RecordIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+      <path d="M18 10v1a6 6 0 0 1-12 0v-1" />
+      <path d="M12 17v4" />
+    </svg>
+  )
+}
+
+function EventsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 3v3" />
+      <path d="M17 3v3" />
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M4 10h16" />
+    </svg>
+  )
+}
+
+function CrmIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19V8a2 2 0 0 1 2-2h7v13" />
+      <path d="M13 19V5h5a2 2 0 0 1 2 2v12" />
+      <path d="M8 10h1" />
+      <path d="M8 13h1" />
+      <path d="M16 10h1" />
+      <path d="M16 13h1" />
+    </svg>
+  )
+}
 
 export function AppShell() {
   const { broker, logout } = useAuth()
@@ -19,7 +51,6 @@ export function AppShell() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-sea-600">Property Voice Agent</p>
-            <h1 className="mt-1 text-lg font-semibold text-ink-950">Broker workspace</h1>
           </div>
           <div className="hidden items-center gap-3 md:flex">
             <div className="rounded-full border border-black/5 bg-white px-4 py-2 text-sm text-ink-700 shadow-sm">
@@ -43,19 +74,20 @@ export function AppShell() {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-black/5 bg-sand-50/95 px-2 py-2 backdrop-blur md:hidden">
-        <div className="mx-auto grid max-w-6xl grid-cols-5 gap-1">
+        <div className="mx-auto grid max-w-6xl grid-cols-3 gap-1">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
                 [
-                  'rounded-2xl px-2 py-3 text-center text-xs font-medium transition',
+                  'flex min-h-[4.25rem] flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-center text-[11px] font-medium leading-tight transition',
                   isActive ? 'bg-ink-950 text-white shadow-soft' : 'text-ink-700 hover:bg-white',
                 ].join(' ')
               }
             >
-              {item.label}
+              <item.icon />
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </div>

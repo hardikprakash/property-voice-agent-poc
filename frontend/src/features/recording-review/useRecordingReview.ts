@@ -69,7 +69,7 @@ export function useRecordingReview(recordingId?: string) {
   const transcribeMutation = useMutation({
     mutationFn: () => apiFetch<TranscriptRead>(`/api/recordings/${recordingId}/transcribe`, { method: 'POST' }),
     onSuccess: async (transcript) => {
-      setFeedback('Stub transcript generated. Edit it if needed, then extract actions.')
+      setFeedback('Transcript ready. Edit it if needed, then extract actions.')
       setTranscriptText(transcript.raw_text)
       await queryClient.invalidateQueries({ queryKey: ['recording-transcript', recordingId] })
       await queryClient.invalidateQueries({ queryKey: ['recordings'] })
@@ -209,6 +209,8 @@ export function useRecordingReview(recordingId?: string) {
     discardAction,
     approveAllPending,
     hasTranscript: Boolean(transcriptQuery.data),
+    captureSource: recordingQuery.data?.capture_source,
+    canGenerateTranscript: recordingQuery.data?.capture_source !== 'text_note',
     isTranscribing: transcribeMutation.isPending,
     isSavingTranscript: saveTranscriptMutation.isPending,
     isExtracting: extractMutation.isPending,

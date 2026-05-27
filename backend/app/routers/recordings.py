@@ -11,7 +11,7 @@ from app.core.config import get_settings
 from app.db import get_session
 from app.models import AudioRecording, Broker, CalendarEvent, Contact, DraftAction, ExtractionRun, Property, PropertyContactLink, Transcript, utcnow
 from app.services.voice import VoiceProviderError, generate_draft_candidates, generate_transcript_text
-from app.schemas import AudioRecordingRead, BulkApproveRequest, CalendarEventRead, DraftActionRead, DraftActionUpdate, ExtractionResultRead, TranscriptRead, TranscriptUpdate
+from app.schemas import AudioRecordingRead, BulkApproveRequest, CalendarEventRead, DraftActionRead, DraftActionUpdate, ExtractionResultRead, QuickNoteCreate, TranscriptRead, TranscriptUpdate
 
 
 settings = get_settings()
@@ -45,6 +45,37 @@ async def save_uploaded_recording(
     recording.storage_path = str(storage_path)
 
     session.add(recording)
+    session.commit()
+    session.refresh(recording)
+    return recording
+
+
+def create_quick_note_recording(session: Session, current_broker: Broker, raw_text: str) -> AudioRecording:
+    note_text = raw_text.strip()
+    if not note_text:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Note text is required")
+
+    title = " ".join(note_text.splitlines()[0].split())[:48] or "Quick note"
+    recording = AudioRecording(
+        broker_id=current_broker.id,
+        original_filename=title,
+        storage_path="",
+        mime_type="text/plain",
+        file_size_bytes=len(note_text.encode("utf-8")),
+        duration_seconds=None,
+        capture_source="text_note",
+        processing_status="transcribed",
+    )
+    transcript = Transcript(
+        broker_id=current_broker.id,
+        recording_id=recording.id,
+        provider="manual_note",
+        raw_text=note_text,
+        language_code="en",
+    )
+
+    session.add(recording)
+    session.add(transcript)
     session.commit()
     session.refresh(recording)
     return recording
@@ -136,6 +167,16 @@ async def browser_recording(
     return as_recording_read(recording)
 
 
+@router.post("/recordings/note", response_model=AudioRecordingRead, status_code=status.HTTP_201_CREATED)
+def create_quick_note(
+    payload: QuickNoteCreate,
+    current_broker: Broker = Depends(get_current_broker),
+    session: Session = Depends(get_session),
+) -> AudioRecordingRead:
+    recording = create_quick_note_recording(session, current_broker, payload.raw_text)
+    return as_recording_read(recording)
+
+
 @router.get("/recordings", response_model=list[AudioRecordingRead])
 def list_recordings(
     current_broker: Broker = Depends(get_current_broker),
@@ -192,6 +233,11 @@ def transcribe_recording(
     session: Session = Depends(get_session),
 ) -> TranscriptRead:
     recording = owned_or_404(session, AudioRecording, recording_id, current_broker.id)
+    if recording.capture_source == "text_note":
+        transcript = latest_transcript(session, recording.id)
+        if transcript is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transcript not found")
+        return as_transcript_read(transcript)
     try:
         transcript = create_transcript(session, recording, current_broker.id)
     except VoiceProviderError as exc:

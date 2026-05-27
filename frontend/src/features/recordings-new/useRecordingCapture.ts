@@ -9,9 +9,11 @@ type UploadRoute = '/api/recordings/upload' | '/api/recordings/browser'
 export function useRecordingCapture() {
   const navigate = useNavigate()
   const [file, setFile] = useState<File | null>(null)
+  const [noteText, setNoteText] = useState('')
   const [durationSeconds, setDurationSeconds] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isCreatingNote, setIsCreatingNote] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
   const [recorderError, setRecorderError] = useState<string | null>(null)
@@ -20,6 +22,31 @@ export function useRecordingCapture() {
   const streamRef = useRef<MediaStream | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const startedAtRef = useRef<number | null>(null)
+
+  const inferDurationSeconds = async (selectedFile: File) => {
+    const objectUrl = URL.createObjectURL(selectedFile)
+    const audio = document.createElement('audio')
+    audio.preload = 'metadata'
+
+    try {
+      const duration = await new Promise<number>((resolve, reject) => {
+        audio.onloadedmetadata = () => resolve(audio.duration)
+        audio.onerror = () => reject(new Error('Could not read audio metadata'))
+        audio.src = objectUrl
+      })
+
+      if (Number.isFinite(duration) && duration > 0) {
+        setDurationSeconds(String(Math.round(duration)))
+        return
+      }
+    } catch {
+      // Leave duration empty if the browser cannot infer it from the uploaded file.
+    } finally {
+      URL.revokeObjectURL(objectUrl)
+    }
+
+    setDurationSeconds('')
+  }
 
   useEffect(() => {
     if (!recordedBlob) {
@@ -71,6 +98,29 @@ export function useRecordingCapture() {
       setError(submitError instanceof Error ? submitError.message : 'Upload failed')
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const createQuickNote = async () => {
+    const trimmedNote = noteText.trim()
+    if (!trimmedNote) {
+      setError('Write a quick note first.')
+      return
+    }
+
+    setError(null)
+    setIsCreatingNote(true)
+
+    try {
+      const recording = await apiFetch<AudioRecordingRead>('/api/recordings/note', {
+        method: 'POST',
+        body: JSON.stringify({ raw_text: trimmedNote }),
+      })
+      navigate(`/recordings/${recording.id}/review`)
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : 'Could not save note')
+    } finally {
+      setIsCreatingNote(false)
     }
   }
 
@@ -141,16 +191,26 @@ export function useRecordingCapture() {
 
   return {
     file,
+    noteText,
     durationSeconds,
     error,
     isUploading,
+    isCreatingNote,
     isRecording,
     recordedBlob,
     recorderError,
     previewUrl,
-    setFile,
-    setDurationSeconds,
+    setNoteText,
+    setFile: (selectedFile: File | null) => {
+      setFile(selectedFile)
+      if (selectedFile) {
+        void inferDurationSeconds(selectedFile)
+      } else {
+        setDurationSeconds('')
+      }
+    },
     uploadSelectedFile,
+    createQuickNote,
     startRecording,
     stopRecording,
     uploadRecordedClip,

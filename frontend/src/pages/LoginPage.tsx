@@ -15,7 +15,7 @@ export function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (broker) {
-    const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/dashboard'
+    const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/recordings/new'
     void navigate(redirectTo, { replace: true })
   }
 
@@ -30,7 +30,7 @@ export function LoginPage() {
       } else {
         await register({ full_name: fullName, email, password })
       }
-      const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/dashboard'
+      const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/recordings/new'
       navigate(redirectTo, { replace: true })
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Authentication failed')

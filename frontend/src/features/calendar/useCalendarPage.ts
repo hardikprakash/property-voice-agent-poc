@@ -78,15 +78,29 @@ export function useCalendarPage() {
     },
   })
 
-  const agenda = [...(eventsQuery.data ?? [])].sort((left, right) => {
+  const updateMutation = useMutation({
+    mutationFn: ({ eventId, payload }: { eventId: string; payload: Record<string, unknown> }) =>
+      apiFetch<CalendarEventRead>(`/api/events/${eventId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['events'] })
+    },
+  })
+
+  const events = [...(eventsQuery.data ?? [])].sort((left, right) => {
     const leftValue = left.starts_at ?? left.due_at ?? left.created_at
     const rightValue = right.starts_at ?? right.due_at ?? right.created_at
     return new Date(leftValue).getTime() - new Date(rightValue).getTime()
   })
 
-  const createEvent = () => {
+  const createEvent = (options?: { onSuccess?: () => void }) => {
     setError(null)
     createMutation.mutate(undefined, {
+      onSuccess: () => {
+        options?.onSuccess?.()
+      },
       onError: (submitError) => {
         setError(submitError instanceof Error ? submitError.message : 'Could not create event')
       },
@@ -94,16 +108,19 @@ export function useCalendarPage() {
   }
 
   return {
-    agenda,
+    events,
     properties: propertiesQuery.data ?? [],
     contacts: contactsQuery.data ?? [],
     form,
     error,
+    resetForm: () => setForm(EMPTY_EVENT_FORM),
     updateFormField: <K extends keyof EventForm>(field: K, value: EventForm[K]) => {
       setForm((current) => ({ ...current, [field]: value }))
     },
     createEvent,
+    updateEvent: (eventId: string, payload: Record<string, unknown>) => updateMutation.mutate({ eventId, payload }),
     deleteEvent: (eventId: string) => deleteMutation.mutate(eventId),
     isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
   }
 }

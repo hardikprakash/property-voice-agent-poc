@@ -1,5 +1,39 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
+function formatApiErrorMessage(body: unknown, fallback: string): string {
+  if (!body || typeof body !== 'object') {
+    return fallback
+  }
+
+  const candidate = (body as { detail?: unknown; message?: unknown }).detail ?? (body as { message?: unknown }).message
+  if (typeof candidate === 'string' && candidate.trim()) {
+    return candidate
+  }
+
+  if (Array.isArray(candidate)) {
+    const messages = candidate
+      .map((item) => {
+        if (!item || typeof item !== 'object') {
+          return null
+        }
+        const entry = item as { loc?: unknown; msg?: unknown }
+        const location = Array.isArray(entry.loc) ? entry.loc.slice(1).join('.') : ''
+        const message = typeof entry.msg === 'string' ? entry.msg : ''
+        if (!message) {
+          return null
+        }
+        return location ? `${location}: ${message}` : message
+      })
+      .filter((message): message is string => Boolean(message))
+
+    if (messages.length) {
+      return messages.join('\n')
+    }
+  }
+
+  return fallback
+}
+
 export class ApiError extends Error {
   status: number
 
@@ -30,7 +64,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     let message = response.statusText || 'Request failed'
     try {
       const body = await response.json()
-      message = body.detail ?? body.message ?? message
+      message = formatApiErrorMessage(body, message)
     } catch {
       const text = await response.text()
       if (text) {

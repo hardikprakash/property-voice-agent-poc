@@ -156,3 +156,66 @@ def test_broker_data_is_isolated(client: TestClient) -> None:
 
     forbidden = client.get(f"/api/properties/{property_id}", headers=second_headers)
     assert forbidden.status_code == 404
+
+
+def test_quick_note_skips_transcription_and_extracts_actions(client: TestClient) -> None:
+    headers = register(client)
+
+    property_response = client.post(
+        "/api/properties",
+        headers=headers,
+        json={
+            "title": "Palm Residency",
+            "address_line_1": "44 Lake View",
+            "city": "Bengaluru",
+            "state": "KA",
+            "postal_code": "560001",
+            "property_type": "villa",
+            "notes": None,
+            "is_active": True,
+        },
+    )
+    assert property_response.status_code == 201
+    property_id = property_response.json()["id"]
+
+    contact_response = client.post(
+        "/api/contacts",
+        headers=headers,
+        json={"full_name": "Asha Mehta", "phone_number": "7777777777", "email": "asha@example.com"},
+    )
+    assert contact_response.status_code == 201
+    contact_id = contact_response.json()["id"]
+
+    link_response = client.post(
+        "/api/property-contact-links",
+        headers=headers,
+        json={"property_id": property_id, "contact_id": contact_id, "role": "buyer"},
+    )
+    assert link_response.status_code == 201
+
+    note_response = client.post(
+        "/api/recordings/note",
+        headers=headers,
+        json={
+            "raw_text": "Asha Mehta wants to visit Palm Residency on 2026-06-02 at 11:00. Follow up with Asha Mehta tomorrow about financing.",
+        },
+    )
+    assert note_response.status_code == 201
+    note_body = note_response.json()
+    assert note_body["capture_source"] == "text_note"
+    assert note_body["processing_status"] == "transcribed"
+
+    transcript_response = client.get(f"/api/recordings/{note_body['id']}/transcript", headers=headers)
+    assert transcript_response.status_code == 200
+    assert "Palm Residency" in transcript_response.json()["raw_text"]
+
+    extract_response = client.post(f"/api/recordings/{note_body['id']}/extract-actions", headers=headers)
+    assert extract_response.status_code == 200
+    draft_actions = extract_response.json()["draft_actions"]
+    assert len(draft_actions) >= 2
+    assert any(action["property_id"] == property_id for action in draft_actions)
+    assert any(action["contact_id"] == contact_id for action in draft_actions)
+
+    transcribe_response = client.post(f"/api/recordings/{note_body['id']}/transcribe", headers=headers)
+    assert transcribe_response.status_code == 200
+    assert transcribe_response.json()["provider"] == "manual_note"
