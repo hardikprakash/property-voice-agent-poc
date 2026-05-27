@@ -65,9 +65,9 @@ export function ContactDetailPage() {
       subtitle="Edit the contact and review which properties and roles this person is linked to."
     >
       <div className="grid gap-4 xl:grid-cols-[1fr_0.95fr]">
-        <section className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+        <section className="app-surface rounded-[1.65rem] p-5 sm:p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-ember-500">Contact</p>
-          <h3 className="mt-3 text-2xl font-semibold text-ink-950">{contactQuery.data?.full_name ?? contactId}</h3>
+          <h3 className="mt-2 text-[1.65rem] font-semibold tracking-[-0.03em] text-ink-950">{contactQuery.data?.full_name ?? contactId}</h3>
           <form
             className="mt-5 space-y-3"
             onSubmit={(event) => {
@@ -91,7 +91,7 @@ export function ContactDetailPage() {
                   type={key === 'email' ? 'email' : 'text'}
                   value={form[key as keyof typeof form]}
                   onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))}
-                  className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+                  className="app-input"
                 />
               </label>
             ))}
@@ -101,33 +101,33 @@ export function ContactDetailPage() {
                 rows={4}
                 value={form.notes}
                 onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
-                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+                className="app-input min-h-[8rem]"
               />
             </label>
-            {feedback ? <p className="rounded-2xl bg-sand-100 px-4 py-3 text-sm text-ink-700">{feedback}</p> : null}
+            {feedback ? <p className="app-surface-muted rounded-2xl px-4 py-3 text-sm text-ink-700">{feedback}</p> : null}
             <button
               type="submit"
               disabled={saveMutation.isPending}
-              className="w-full rounded-2xl bg-ink-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-ink-900 disabled:opacity-60"
+              className="app-button-primary w-full px-4 py-3 disabled:opacity-60"
             >
               {saveMutation.isPending ? 'Saving...' : 'Save contact'}
             </button>
           </form>
         </section>
 
-        <section className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+        <section className="app-surface rounded-[1.65rem] p-5 sm:p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">Linked properties</p>
           <div className="mt-4 space-y-3">
             {(linksQuery.data ?? []).length ? (
               (linksQuery.data ?? []).map((link) => (
-                <div key={link.id} className="rounded-2xl bg-sand-50 px-4 py-3">
+                <div key={link.id} className="app-surface-muted rounded-[1.2rem] px-4 py-3">
                   <p className="font-medium text-ink-950">{propertyById[link.property_id]?.title ?? link.property_id}</p>
                   <p className="mt-1 text-xs uppercase tracking-[0.2em] text-ink-500">{link.role}</p>
                   {link.notes ? <p className="mt-2 text-sm text-ink-700">{link.notes}</p> : null}
                 </div>
               ))
             ) : (
-              <div className="rounded-2xl bg-sand-50 px-4 py-3 text-sm text-ink-700">No linked properties yet.</div>
+              <div className="app-surface-muted rounded-[1.2rem] px-4 py-3 text-sm text-ink-700">No linked properties yet.</div>
             )}
           </div>
         </section>

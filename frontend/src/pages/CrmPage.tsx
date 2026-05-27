@@ -136,8 +136,8 @@ export function CrmPage() {
 
   const tabButtonClass = (tab: CrmTab) =>
     [
-      'rounded-full px-4 py-2 text-sm font-medium transition',
-      activeTab === tab ? 'bg-ink-950 text-white' : 'bg-white text-ink-700 hover:bg-sand-100',
+      'px-4 py-2 text-sm',
+      activeTab === tab ? 'app-button-primary' : 'app-button-secondary',
     ].join(' ')
 
   return (
@@ -165,18 +165,18 @@ export function CrmPage() {
                 <Link
                   key={property.id}
                   to={`/properties/${property.id}`}
-                  className="rounded-[2rem] border border-black/5 bg-white p-5 shadow-soft transition hover:-translate-y-0.5"
+                  className="app-surface rounded-[1.65rem] p-4 transition hover:-translate-y-0.5 sm:p-5"
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">Property</p>
-                  <h3 className="mt-3 text-xl font-semibold text-ink-950">{property.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-ink-700">
+                  <h3 className="mt-2 text-xl font-semibold text-ink-950">{property.title}</h3>
+                  <p className="mt-1.5 text-sm leading-6 text-ink-700">
                     {property.address_line_1}, {property.city} · {property.property_type}
                   </p>
-                  <p className="mt-3 text-xs text-ink-500">Tap to edit details and linked people.</p>
+                  <p className="mt-2 text-xs text-ink-500">Tap to edit details and linked people.</p>
                 </Link>
               ))
             ) : (
-              <div className="rounded-[2rem] border border-dashed border-black/10 bg-white/70 p-6 text-sm text-ink-700 md:col-span-2 xl:col-span-3">
+              <div className="app-surface-muted rounded-[1.65rem] border-dashed p-6 text-sm text-ink-700 md:col-span-2 xl:col-span-3">
                 No properties yet. Add the first listing from the floating plus button.
               </div>
             )}
@@ -194,17 +194,17 @@ export function CrmPage() {
                   <Link
                     key={contact.id}
                     to={`/contacts/${contact.id}`}
-                    className="rounded-[2rem] border border-black/5 bg-white p-5 shadow-soft transition hover:-translate-y-0.5"
+                    className="app-surface rounded-[1.65rem] p-4 transition hover:-translate-y-0.5 sm:p-5"
                   >
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-ember-500">
                       {activeTab === 'buyers' ? 'Buyer' : 'Seller'}
                     </p>
-                    <h3 className="mt-3 text-xl font-semibold text-ink-950">{contact.full_name}</h3>
-                    <p className="mt-2 text-sm leading-6 text-ink-700">{contact.phone_number || contact.email || 'No contact details yet'}</p>
+                    <h3 className="mt-2 text-xl font-semibold text-ink-950">{contact.full_name}</h3>
+                    <p className="mt-1.5 text-sm leading-6 text-ink-700">{contact.phone_number || contact.email || 'No contact details yet'}</p>
                     {relatedProperties.length ? (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {relatedProperties.map((title) => (
-                          <span key={title} className="rounded-full bg-sand-100 px-3 py-1 text-xs text-ink-700">
+                          <span key={title} className="app-chip">
                             {title}
                           </span>
                         ))}
@@ -214,7 +214,7 @@ export function CrmPage() {
                 )
               })
             ) : (
-              <div className="rounded-[2rem] border border-dashed border-black/10 bg-white/70 p-6 text-sm text-ink-700 md:col-span-2 xl:col-span-3">
+              <div className="app-surface-muted rounded-[1.65rem] border-dashed p-6 text-sm text-ink-700 md:col-span-2 xl:col-span-3">
                 No {activeTab} yet. Add one from the floating plus button and optionally attach a property link immediately.
               </div>
             )}
@@ -225,7 +225,7 @@ export function CrmPage() {
       <button
         type="button"
         onClick={() => setIsCreateOpen(true)}
-        className="fixed bottom-24 right-5 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-sea-500 text-white shadow-[0_14px_32px_rgba(20,184,166,0.35)] transition hover:bg-sea-600 md:bottom-8"
+        className="app-button-primary fixed bottom-24 right-5 z-20 flex h-14 w-14 items-center justify-center px-0 py-0 md:bottom-8"
         aria-label="Add new record"
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -236,15 +236,15 @@ export function CrmPage() {
 
       {isCreateOpen ? (
         <div className="fixed inset-0 z-40 flex items-end bg-ink-950/35 p-4 md:items-center md:justify-center">
-          <div className="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-[2rem] bg-white p-6 shadow-soft">
+          <div className="app-surface max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-[1.8rem] p-5 sm:p-6">
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="space-y-1.5">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">Create</p>
-                <h3 className="mt-2 text-2xl font-semibold text-ink-950">
+                <h3 className="text-[1.6rem] font-semibold tracking-[-0.03em] text-ink-950">
                   {activeTab === 'properties' ? 'New property' : `New ${activeTab === 'buyers' ? 'buyer' : 'seller'}`}
                 </h3>
               </div>
-              <button type="button" onClick={() => setIsCreateOpen(false)} className="rounded-full bg-sand-100 px-3 py-2 text-sm text-ink-700">
+              <button type="button" onClick={() => setIsCreateOpen(false)} className="app-button-ghost px-3 py-2 text-sm">
                 Close
               </button>
             </div>
@@ -272,7 +272,7 @@ export function CrmPage() {
                       <input
                         value={propertyForm[field as keyof typeof propertyForm] as string}
                         onChange={(event) => setPropertyForm((current) => ({ ...current, [field]: event.target.value }))}
-                        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+                        className="app-input"
                       />
                     </label>
                   ))}
@@ -282,7 +282,7 @@ export function CrmPage() {
                       rows={3}
                       value={propertyForm.notes}
                       onChange={(event) => setPropertyForm((current) => ({ ...current, notes: event.target.value }))}
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+                      className="app-input min-h-[7rem]"
                     />
                   </label>
                 </>
@@ -299,7 +299,7 @@ export function CrmPage() {
                         type={field === 'email' ? 'email' : 'text'}
                         value={contactForm[field as keyof typeof contactForm] as string}
                         onChange={(event) => setContactForm((current) => ({ ...current, [field]: event.target.value }))}
-                        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+                        className="app-input"
                       />
                     </label>
                   ))}
@@ -308,7 +308,7 @@ export function CrmPage() {
                     <select
                       value={contactForm.property_id}
                       onChange={(event) => setContactForm((current) => ({ ...current, property_id: event.target.value }))}
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+                      className="app-input"
                     >
                       <option value="">Select a property</option>
                       {properties.map((property) => (
@@ -324,7 +324,7 @@ export function CrmPage() {
                       rows={3}
                       value={contactForm.notes}
                       onChange={(event) => setContactForm((current) => ({ ...current, notes: event.target.value }))}
-                      className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+                      className="app-input min-h-[7rem]"
                     />
                   </label>
                 </>
@@ -335,7 +335,7 @@ export function CrmPage() {
               <button
                 type="submit"
                 disabled={createPropertyMutation.isPending || createContactMutation.isPending}
-                className="w-full rounded-2xl bg-ink-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-ink-900 disabled:opacity-60"
+                className="app-button-primary w-full px-4 py-3 disabled:opacity-60"
               >
                 {createPropertyMutation.isPending || createContactMutation.isPending ? 'Saving...' : 'Create'}
               </button>

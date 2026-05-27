@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { apiFetch } from '../../lib/api'
 import { fromDatetimeLocalInput } from '../../lib/datetime'
-import type { CalendarEventRead, ContactRead, PropertyRead } from '../../types'
+import type { CalendarEventRead, ContactRead, PropertyContactLinkRead, PropertyRead } from '../../types'
 
 type EventForm = {
   title: string
@@ -45,6 +45,10 @@ export function useCalendarPage() {
   const contactsQuery = useQuery({
     queryKey: ['contacts'],
     queryFn: () => apiFetch<ContactRead[]>('/api/contacts'),
+  })
+  const linksQuery = useQuery({
+    queryKey: ['property-contact-links'],
+    queryFn: () => apiFetch<PropertyContactLinkRead[]>('/api/property-contact-links'),
   })
 
   const createMutation = useMutation({
@@ -111,6 +115,7 @@ export function useCalendarPage() {
     events,
     properties: propertiesQuery.data ?? [],
     contacts: contactsQuery.data ?? [],
+    links: linksQuery.data ?? [],
     form,
     error,
     resetForm: () => setForm(EMPTY_EVENT_FORM),

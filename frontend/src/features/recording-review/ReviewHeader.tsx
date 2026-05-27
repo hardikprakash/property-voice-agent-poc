@@ -30,15 +30,15 @@ export function ReviewHeader({
   onExtract,
 }: ReviewHeaderProps) {
   return (
-    <section className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+    <section className="app-surface rounded-[1.65rem] p-5 sm:p-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div>
+        <div className="space-y-1.5">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">{captureSource === 'text_note' ? 'Quick note' : 'Recording'}</p>
-          <h3 className="mt-3 text-2xl font-semibold text-ink-950">{title}</h3>
-          <p className="mt-3 text-sm leading-6 text-ink-700">
+          <h3 className="text-[1.65rem] font-semibold tracking-[-0.03em] text-ink-950">{title}</h3>
+          <p className="text-sm leading-6 text-ink-700">
             Current status: <span className="font-medium">{recordingStatus}</span>
           </p>
-          {durationSeconds ? <p className="mt-1 text-xs text-ink-500">Duration {durationSeconds} seconds</p> : null}
+          {durationSeconds ? <p className="text-xs text-ink-500">Duration {durationSeconds} seconds</p> : null}
         </div>
         <div className="flex flex-wrap gap-2">
           {canGenerateTranscript ? (
@@ -46,30 +46,30 @@ export function ReviewHeader({
               type="button"
               onClick={onTranscribe}
               disabled={isTranscribing}
-              className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-ink-700 transition hover:bg-sand-100 disabled:opacity-60"
+              className="app-button-secondary px-4 py-2 disabled:opacity-60"
             >
-              {isTranscribing ? 'Generating...' : hasTranscript ? 'Refresh transcript' : 'Generate transcript'}
+              {isTranscribing ? 'Generating...' : hasTranscript ? 'Refresh Transcript' : 'Generate Transcript'}
             </button>
           ) : null}
           <button
             type="button"
             onClick={onSaveTranscript}
             disabled={!hasTranscript || isSavingTranscript}
-            className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-ink-700 transition hover:bg-sand-100 disabled:opacity-60"
+            className="app-button-secondary px-4 py-2 disabled:opacity-60"
           >
-            Save transcript
+            Save Transcript
           </button>
           <button
             type="button"
             onClick={onExtract}
             disabled={!hasTranscript || isExtracting}
-            className="rounded-full bg-ink-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-ink-900 disabled:opacity-60"
+            className="app-button-primary px-4 py-2 disabled:opacity-60"
           >
-            {isExtracting ? 'Extracting...' : 'Extract draft actions'}
+            {isExtracting ? 'Extracting...' : 'Extract Draft Actions'}
           </button>
         </div>
       </div>
-      {feedback ? <p className="mt-4 rounded-2xl bg-sand-100 px-4 py-3 text-sm text-ink-700">{feedback}</p> : null}
+      {feedback ? <p className="app-surface-muted mt-4 rounded-2xl px-4 py-3 text-sm text-ink-700">{feedback}</p> : null}
     </section>
   )
 }

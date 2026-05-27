@@ -29,13 +29,13 @@ export function DraftActionCard({
   onDiscard,
 }: DraftActionCardProps) {
   return (
-    <article className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+    <article className="app-surface rounded-[1.65rem] p-5 sm:p-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div>
+        <div className="space-y-1.5">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">{action.action_type}</p>
-          <h3 className="mt-2 text-xl font-semibold text-ink-950">{action.title}</h3>
-          <p className="mt-2 text-sm text-ink-600">Confidence {action.confidence_label} · status {action.review_status}</p>
-          <p className="mt-2 text-xs text-ink-500">Created {formatDateTimeLabel(action.created_at)}</p>
+          <h3 className="text-xl font-semibold text-ink-950">{action.title}</h3>
+          <p className="text-sm text-ink-600">Confidence {action.confidence_label} · status {action.review_status}</p>
+          <p className="text-xs text-ink-500">Created {formatDateTimeLabel(action.created_at)}</p>
         </div>
         {form.unresolved_fields.length ? (
           <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">Resolve: {form.unresolved_fields.join(', ')}</div>
@@ -48,7 +48,7 @@ export function DraftActionCard({
           <input
             value={form.title}
             onChange={(event) => onChange((current) => ({ ...current, title: event.target.value }))}
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input"
           />
         </label>
         <label className="block space-y-2 lg:col-span-2">
@@ -57,7 +57,7 @@ export function DraftActionCard({
             rows={3}
             value={form.description}
             onChange={(event) => onChange((current) => ({ ...current, description: event.target.value }))}
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input min-h-[7rem]"
           />
         </label>
         <label className="block space-y-2">
@@ -71,7 +71,7 @@ export function DraftActionCard({
                 unresolved_fields: current.unresolved_fields.filter((item) => item !== 'property_id'),
               }))
             }
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input"
           >
             <option value="">Select property</option>
             {properties.map((property) => (
@@ -92,7 +92,7 @@ export function DraftActionCard({
                 unresolved_fields: current.unresolved_fields.filter((item) => item !== 'contact_id'),
               }))
             }
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input"
           >
             <option value="">Select contact</option>
             {contacts.map((contact) => (
@@ -107,7 +107,7 @@ export function DraftActionCard({
           <select
             value={form.contact_role}
             onChange={(event) => onChange((current) => ({ ...current, contact_role: event.target.value }))}
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input"
           >
             <option value="">Unknown</option>
             <option value="buyer">Buyer</option>
@@ -121,7 +121,7 @@ export function DraftActionCard({
           <select
             value={form.confidence_label}
             onChange={(event) => onChange((current) => ({ ...current, confidence_label: event.target.value }))}
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input"
           >
             <option value="high">High</option>
             <option value="medium">Medium</option>
@@ -140,7 +140,7 @@ export function DraftActionCard({
                 unresolved_fields: current.unresolved_fields.filter((item) => item !== 'timing'),
               }))
             }
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input"
           />
         </label>
         <label className="block space-y-2">
@@ -149,7 +149,7 @@ export function DraftActionCard({
             type="datetime-local"
             value={form.ends_at}
             onChange={(event) => onChange((current) => ({ ...current, ends_at: event.target.value }))}
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input"
           />
         </label>
         <label className="block space-y-2 lg:col-span-2">
@@ -164,7 +164,7 @@ export function DraftActionCard({
                 unresolved_fields: current.unresolved_fields.filter((item) => item !== 'timing'),
               }))
             }
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input"
           />
         </label>
       </div>
@@ -174,7 +174,7 @@ export function DraftActionCard({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-ink-700 transition hover:bg-sand-100 disabled:opacity-60"
+          className="app-button-secondary px-4 py-2 disabled:opacity-60"
         >
           Save changes
         </button>
@@ -182,7 +182,7 @@ export function DraftActionCard({
           type="button"
           onClick={onApprove}
           disabled={isApproving}
-          className="rounded-full bg-ink-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-ink-900 disabled:opacity-60"
+          className="app-button-primary px-4 py-2 disabled:opacity-60"
         >
           Approve
         </button>

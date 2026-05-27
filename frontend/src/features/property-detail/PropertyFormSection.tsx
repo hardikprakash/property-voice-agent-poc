@@ -30,9 +30,9 @@ const FIELD_LABELS: Array<{ key: Exclude<keyof PropertyFormValues, 'notes'>; lab
 
 export function PropertyFormSection({ title, feedback, form, isSaving, onFieldChange, onSubmit }: PropertyFormSectionProps) {
   return (
-    <section className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+    <section className="app-surface rounded-[1.65rem] p-5 sm:p-6">
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">Property</p>
-      <h3 className="mt-3 text-2xl font-semibold text-ink-950">{title}</h3>
+      <h3 className="mt-2 text-[1.65rem] font-semibold tracking-[-0.03em] text-ink-950">{title}</h3>
       <form
         className="mt-5 space-y-3"
         onSubmit={(event) => {
@@ -46,7 +46,7 @@ export function PropertyFormSection({ title, feedback, form, isSaving, onFieldCh
             <input
               value={form[key]}
               onChange={(event) => onFieldChange(key, event.target.value)}
-              className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+              className="app-input"
             />
           </label>
         ))}
@@ -56,14 +56,14 @@ export function PropertyFormSection({ title, feedback, form, isSaving, onFieldCh
             rows={4}
             value={form.notes}
             onChange={(event) => onFieldChange('notes', event.target.value)}
-            className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-sea-500"
+            className="app-input min-h-[8rem]"
           />
         </label>
-        {feedback ? <p className="rounded-2xl bg-sand-100 px-4 py-3 text-sm text-ink-700">{feedback}</p> : null}
+        {feedback ? <p className="app-surface-muted rounded-2xl px-4 py-3 text-sm text-ink-700">{feedback}</p> : null}
         <button
           type="submit"
           disabled={isSaving}
-          className="w-full rounded-2xl bg-ink-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-ink-900 disabled:opacity-60"
+          className="app-button-primary w-full px-4 py-3 disabled:opacity-60"
         >
           {isSaving ? 'Saving...' : 'Save property'}
         </button>

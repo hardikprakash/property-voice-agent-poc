@@ -1,50 +1,44 @@
+import { useState } from 'react'
+
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 
 import { useRecordingCapture } from '../features/recordings-new/useRecordingCapture'
 import { apiFetch } from '../lib/api'
-import { formatDateTimeLabel } from '../lib/datetime'
 import type { CalendarEventRead } from '../types'
-
-function isToday(value?: string | null): boolean {
-  if (!value) {
-    return false
-  }
-
-  const target = new Date(value)
-  const now = new Date()
-  return target.getFullYear() === now.getFullYear() && target.getMonth() === now.getMonth() && target.getDate() === now.getDate()
-}
 
 export function RecordingsNewPage() {
   const capture = useRecordingCapture()
+  const [isQuickNoteOpen, setIsQuickNoteOpen] = useState(false)
   const eventsQuery = useQuery({
     queryKey: ['events'],
     queryFn: () => apiFetch<CalendarEventRead[]>('/api/events'),
   })
 
-  const todaysPendingEvents = (eventsQuery.data ?? [])
-    .filter((event) => event.status !== 'done' && isToday(event.starts_at ?? event.due_at ?? event.created_at))
-    .sort((left, right) => {
-      const leftValue = left.starts_at ?? left.due_at ?? left.created_at
-      const rightValue = right.starts_at ?? right.due_at ?? right.created_at
-      return new Date(leftValue).getTime() - new Date(rightValue).getTime()
-    })
+  const pendingTaskCount = (eventsQuery.data ?? []).filter((event) => event.status !== 'done').length
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-12rem)] max-w-md flex-col items-center justify-start px-2 py-4">
-      <div className="flex w-full flex-1 flex-col items-center gap-10 text-center">
-        <div className="space-y-3">
-          <h1 className="text-4xl font-semibold tracking-tight text-ink-950 sm:text-5xl">Forget Nothing.</h1>
-          <p className="mx-auto max-w-[18rem] text-sm leading-6 text-ink-700">
-            Record after a call, upload audio, or jot a quick note. The draft-action review flow starts right after capture.
-          </p>
-        </div>
+    <div className="mx-auto flex min-h-[calc(100vh-12rem)] max-w-lg flex-col items-center justify-start px-1 py-3">
+      <div className="flex w-full flex-1 flex-col items-center gap-7 text-center">
+        <p className="mx-auto max-w-[23rem] text-sm leading-6 text-ink-600">
+          Record after a call, upload audio, or jot a quick note. Actions will be drafted automatically.
+        </p>
 
-        <div className="flex w-full flex-col items-center gap-5">
-          <div className="relative flex h-44 w-44 items-center justify-center">
-            <div className="absolute h-36 w-36 animate-pulse rounded-full bg-sea-500/10" />
-            <div className="absolute h-32 w-32 rounded-full bg-sea-500/5" />
+        <section className="app-surface-muted flex w-full max-w-sm items-center justify-between gap-3 rounded-[1.3rem] px-4 py-3 text-left">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(47,143,134,0.12)] text-sea-700">
+              <TaskListIcon />
+            </span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sea-600">Tasks</p>
+              <p className="text-sm text-ink-900">{pendingTaskCount} pending {pendingTaskCount === 1 ? 'task' : 'tasks'}</p>
+            </div>
+          </div>
+        </section>
+
+        <div className="flex w-full flex-col items-center gap-4">
+          <div className="relative flex h-40 w-40 items-center justify-center">
+            <div className="absolute h-32 w-32 animate-pulse rounded-full bg-sea-500/8" />
+            <div className="absolute h-28 w-28 rounded-full bg-sea-500/5" />
             <button
               type="button"
               onClick={() => {
@@ -55,7 +49,7 @@ export function RecordingsNewPage() {
                 void capture.startRecording()
               }}
               className={[
-                'relative z-10 flex h-32 w-32 items-center justify-center rounded-full border border-black/5 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.08)] transition active:scale-[0.98]',
+                'app-surface relative z-10 flex h-28 w-28 items-center justify-center rounded-full transition active:scale-[0.98]',
                 capture.isRecording ? 'ring-8 ring-rose-400/15' : 'hover:-translate-y-0.5',
               ].join(' ')}
               aria-label={capture.isRecording ? 'Stop recording' : 'Start recording'}
@@ -68,11 +62,14 @@ export function RecordingsNewPage() {
             </button>
           </div>
 
-          <p className="text-sm text-ink-600">{capture.isRecording ? 'Tap again to stop' : 'Tap to record'}</p>
+          <p className="-mt-1 text-xs text-ink-500">{capture.isRecording ? 'Tap again to stop' : 'Tap to record'}</p>
 
           <div className="w-full max-w-sm space-y-3">
-            <label className="block cursor-pointer rounded-2xl border border-dashed border-black/10 bg-white px-4 py-4 text-sm text-ink-700 transition hover:bg-sand-50">
-              <span className="font-medium text-ink-900">or upload an existing file</span>
+            <label className="app-surface-muted block cursor-pointer rounded-[1.35rem] border-dashed px-4 py-4 text-sm text-ink-700 transition hover:bg-[#f4efe5]">
+              <span className="flex items-center gap-2 text-ink-800">
+                <PaperclipIcon />
+                <span>or upload an existing file</span>
+              </span>
               <input
                 type="file"
                 accept="audio/*"
@@ -88,72 +85,56 @@ export function RecordingsNewPage() {
                   void capture.uploadSelectedFile()
                 }}
                 disabled={capture.isUploading}
-                className="w-full rounded-2xl bg-ink-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-ink-900 disabled:opacity-60"
+                className="app-button-primary w-full px-4 py-3 disabled:opacity-60"
               >
                 {capture.isUploading ? 'Uploading...' : 'Upload and review'}
               </button>
             ) : null}
           </div>
 
-          <div className="w-full max-w-sm rounded-[2rem] border border-black/5 bg-white p-4 text-left shadow-soft">
-            <p className="text-sm font-medium text-ink-950">Need to move faster?</p>
-            <p className="mt-1 text-xs leading-5 text-ink-500">Type the key call notes here and skip the transcription step.</p>
-            <textarea
-              rows={6}
-              value={capture.noteText}
-              onChange={(event) => capture.setNoteText(event.target.value)}
-              placeholder="Example: Maya wants to visit Harbor House on Friday at 3pm. Follow up in 2 days about documents."
-              className="mt-4 w-full rounded-[1.5rem] border border-black/10 bg-sand-50 px-4 py-4 text-sm leading-6 text-ink-900 outline-none transition focus:border-sea-500"
-            />
+          <section className="app-surface w-full max-w-sm rounded-[1.65rem] text-left">
             <button
               type="button"
-              onClick={() => {
-                void capture.createQuickNote()
-              }}
-              disabled={capture.isCreatingNote}
-              className="mt-4 w-full rounded-2xl bg-ember-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-ember-600 disabled:opacity-60"
+              onClick={() => setIsQuickNoteOpen((current) => !current)}
+              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left text-ink-900"
             >
-              {capture.isCreatingNote ? 'Saving note...' : 'Save note and review'}
+              <span className="text-sm text-ink-900">Or write a quick note instead</span>
+              <span className={[
+                'flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(47,143,134,0.1)] text-sea-700 transition',
+                isQuickNoteOpen ? 'rotate-180' : '',
+              ].join(' ')}>
+                <ChevronDownIcon />
+              </span>
             </button>
-          </div>
 
-          <section className="w-full rounded-[2rem] border border-black/5 bg-white/90 p-5 text-left shadow-soft">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sea-600">Today</p>
-                <h2 className="mt-2 text-xl font-semibold text-ink-950">Pending events</h2>
+            {isQuickNoteOpen ? (
+              <div className="border-t border-black/5 px-4 pb-4">
+                <textarea
+                  rows={6}
+                  value={capture.noteText}
+                  onChange={(event) => capture.setNoteText(event.target.value)}
+                  placeholder="Example: Maya wants to visit Harbor House on Friday at 3pm. Follow up in 2 days about documents."
+                  className="app-input mt-4 min-h-[9.5rem] bg-[#fbfaf6] leading-6"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    void capture.createQuickNote()
+                  }}
+                  disabled={capture.isCreatingNote}
+                  className="app-button-primary mt-4 w-full px-4 py-3 disabled:opacity-60"
+                >
+                  {capture.isCreatingNote ? 'Saving note...' : 'Save note and review'}
+                </button>
               </div>
-              <Link to="/calendar" className="rounded-full bg-sand-100 px-3 py-2 text-xs font-medium text-ink-700 transition hover:bg-sand-200">
-                Open events
-              </Link>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {todaysPendingEvents.length ? (
-                todaysPendingEvents.slice(0, 3).map((event) => (
-                  <article key={event.id} className="rounded-[1.5rem] bg-sand-50 px-4 py-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium text-ink-950">{event.title}</p>
-                        <p className="mt-1 text-xs text-ink-600">{formatDateTimeLabel(event.starts_at ?? event.due_at ?? event.created_at)}</p>
-                      </div>
-                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-ink-700">{event.event_type.replace('_', ' ')}</span>
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <div className="rounded-[1.5rem] border border-dashed border-black/10 bg-sand-50 px-4 py-5 text-sm text-ink-700">
-                  No pending events for today yet.
-                </div>
-              )}
-            </div>
+            ) : null}
           </section>
 
           {capture.recorderError ? <p className="w-full rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{capture.recorderError}</p> : null}
           {capture.error ? <p className="w-full rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{capture.error}</p> : null}
 
           {capture.recordedBlob && capture.previewUrl ? (
-            <div className="w-full rounded-[2rem] border border-black/5 bg-white p-4 text-left shadow-soft">
+            <div className="app-surface w-full rounded-[1.65rem] p-4 text-left">
               <p className="text-sm font-medium text-ink-950">Ready to review</p>
               <p className="mt-1 text-xs text-ink-500">{capture.durationSeconds ? `${capture.durationSeconds}s captured` : 'Recorded in browser'}</p>
               <audio controls className="mt-4 w-full" src={capture.previewUrl} />
@@ -163,7 +144,7 @@ export function RecordingsNewPage() {
                   void capture.uploadRecordedClip()
                 }}
                 disabled={capture.isUploading}
-                className="mt-4 w-full rounded-2xl bg-sea-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-sea-600 disabled:opacity-60"
+                className="app-button-primary mt-4 w-full px-4 py-3 disabled:opacity-60"
               >
                 {capture.isUploading ? 'Uploading...' : 'Upload recorded clip'}
               </button>
@@ -172,5 +153,34 @@ export function RecordingsNewPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function TaskListIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 6h11" />
+      <path d="M9 12h11" />
+      <path d="M9 18h11" />
+      <path d="m3.5 6 1.5 1.5L7.5 5" />
+      <path d="m3.5 12 1.5 1.5L7.5 11" />
+      <path d="m3.5 18 1.5 1.5L7.5 17" />
+    </svg>
+  )
+}
+
+function PaperclipIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m21.44 11.05-8.49 8.49a5.5 5.5 0 0 1-7.78-7.78l8.5-8.49a3.5 3.5 0 0 1 4.95 4.95l-8.5 8.49a1.5 1.5 0 1 1-2.12-2.12l7.78-7.78" />
+    </svg>
+  )
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   )
 }
